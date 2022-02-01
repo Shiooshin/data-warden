@@ -3,6 +3,11 @@
 #   intended to run in multiple environments; otherwise, check them in:
 .python-version
 
+__pycache__/
+*.py[cod]
+
+
+
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
@@ -18,3 +23,19 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
