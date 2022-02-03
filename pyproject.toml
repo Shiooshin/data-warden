@@ -12,6 +12,7 @@ fastapi = "^0.73.0"
 pytest = "^5.2"
 flake8 = "^4.0.1"
 uvicorn = "^0.17.1"
+requests = "^2.27.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
