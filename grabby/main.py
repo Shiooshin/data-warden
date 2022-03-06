@@ -4,10 +4,24 @@ from datetime import date
 
 def main():
 
-    url = "https://api.github.com/search/repositories?q=topic:big-data&sort=stars&per_page=100"
+    topic_list = ['big-data']
+    url_tuples = map(prepare_github_url, topic_list)
+
+    result_dict = dict()
+    for tuple in url_tuples:
+        result_dict[tuple[0], get_repo_data(tuple[1])]
+
+
+def prepare_github_url(topic):
+    return topic, f'''https://api.github.com/search/repositories?
+               q=topic:{topic}&sort=stars&per_page=100'''
+
+
+def get_repo_data(repo_url):
+    result_dict = dict()
     headers = {"Accept": "applicaiton/vnd.github.v3+json"}
 
-    r = requests.get(url, headers=headers)
+    r = requests.get(repo_url, headers=headers)
     print(f"Status Code: {r.status_code}")
 
     response_dict = r.json()
@@ -16,10 +30,12 @@ def main():
     repo_dicts = response_dict["items"]
     print(f"Page repos: {len(repo_dicts)}")
     for repo in repo_dicts[:1]:  # first 5 elements for testing
-        fill_stats(repo)
+        fill_stats(repo, result_dict)
+
+    return result_dict
 
 
-def fill_stats(repo):
+def fill_stats(repo, result_dict):
     repo_stats = dict()
     repo_name = repo["name"]
     repo_owner = repo["owner"]["login"]
@@ -45,6 +61,8 @@ def fill_stats(repo):
                                             repo_name,
                                             'issues', '&state=closed')
 
+    result_dict[repo_name] = repo_stats
+
 
 def compose_date():
     today = date.today()
@@ -57,7 +75,8 @@ def get_count(owner, repo_name, suffix, state=''):
 
 
 def prepare_url(owner, repo_name, suffix, state):
-    url = f'https://api.github.com/repos/{owner}/{repo_name}/{suffix}?per_page=1&anon=true{state}'
+    url = f'''https://api.github.com/repos/
+              {owner}/{repo_name}/{suffix}?per_page=1&anon=true{state}'''
     print(f'URL : {url}')
     return url
 
