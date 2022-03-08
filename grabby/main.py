@@ -5,24 +5,37 @@ from datetime import date
 def main():
 
     topic_list = ['big-data']
+
+    excluded_repos = ['awesome-scalability']
+
     url_tuples = map(prepare_github_url, topic_list)
 
     result_dict = dict()
     for tuple in url_tuples:
-        result_dict[tuple[0], get_repo_data(tuple[1])]
+        result_dict[tuple[0]] = get_repo_data(tuple[1], excluded_repos)
+
+    print('result set:')
+    print(result_dict)
 
 
 def prepare_github_url(topic):
-    return topic, f'''https://api.github.com/search/repositories?
-               q=topic:{topic}&sort=stars&per_page=100'''
+    return topic, f'https://api.github.com/search/repositories?q=topic:{topic}&sort=stars&per_page=100'
 
 
-def get_repo_data(repo_url):
+def get_repo_data(repo_url, excluded_repos):
     result_dict = dict()
     headers = {"Accept": "applicaiton/vnd.github.v3+json"}
 
-    r = requests.get(repo_url, headers=headers)
+    try:
+        r = requests.get(repo_url, headers=headers)
+    except requests.exceptions.ConnectionError:
+        r.status_code = 500
+
     print(f"Status Code: {r.status_code}")
+
+    if r.status_code != 200:
+        print('Request failed')
+        return result_dict
 
     response_dict = r.json()
     print(f"Total repos: {response_dict['total_count']}")
@@ -30,7 +43,9 @@ def get_repo_data(repo_url):
     repo_dicts = response_dict["items"]
     print(f"Page repos: {len(repo_dicts)}")
     for repo in repo_dicts[:1]:  # first 5 elements for testing
-        fill_stats(repo, result_dict)
+
+        if repo["name"] not in excluded_repos and repo["stargazers_count"] > 100:
+            fill_stats(repo, result_dict)
 
     return result_dict
 
@@ -75,8 +90,7 @@ def get_count(owner, repo_name, suffix, state=''):
 
 
 def prepare_url(owner, repo_name, suffix, state):
-    url = f'''https://api.github.com/repos/
-              {owner}/{repo_name}/{suffix}?per_page=1&anon=true{state}'''
+    url = f'https://api.github.com/repos/{owner}/{repo_name}/{suffix}?per_page=1&anon=true{state}'
     print(f'URL : {url}')
     return url
 
@@ -101,8 +115,6 @@ def get_total_count_from_headers(headers: dict):
     last_page_url = pagination_value.split(';')[-2]
     index_page = last_page_url.rfind('page=')
     index_bracket = last_page_url.rfind('>')
-
-    print(f'index_page: {index_page}  | index_bracket: {index_bracket}')
 
     if index_page < 0 or index_bracket < 0:
         print('count is 0')
