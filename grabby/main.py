@@ -62,7 +62,7 @@ def fill_stats(repo, result_dict):
     repo_stats['watcher_count'] = repo["watchers_count"]
     repo_stats['fork_count'] = repo["forks_count"]
     repo_stats['topics'] = repo["topics"]
-    repo_stats['open_isses'] = repo["open_issues_count"]
+    repo_stats['open_issues'] = repo["open_issues_count"]
     repo_stats['contributors'] = get_count(repo_owner,
                                            repo_name,
                                            'contributors')

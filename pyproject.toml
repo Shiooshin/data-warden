@@ -8,6 +8,7 @@ authors = ["Marian Faryna <marikfarik@gmail.com>"]
 python = "^3.7"
 fastapi = "^0.73.0"
 python-rocksdb = "^0.7.0"
+psycopg2 = "^2.9.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
