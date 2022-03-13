@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS repo_statistics (
     open_issues INT NOT NULL,
     contributors INT NOT NULL,
     commits INT NOT NULL,
-    tags INT NOT NULL,
     closed_issues INT NOT NULL,
     PRIMARY KEY (repo_id, agg_date),
     FOREIGN KEY (repo_id)

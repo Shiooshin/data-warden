@@ -4,13 +4,22 @@ from handler import StorageHandler
 
 
 class RocksdbHandler(StorageHandler):
-    __db__ = None
+    __repository_db__ = None
+    __statistics_db__ = None
+
+    repository_db_path = "/opt/rocksdb/repository.db"
+    statistics_db_path = "/opt/rocksdb/statistics.db"
 
     def __init__(self) -> None:
         super().__init__()
-        self.__db__ = self.get_db_instnce()
+        db_opts = self.db_config()
+        self.__repository_db__ = \
+            self.get_repository_db_instnce(self.repository_db_path, db_opts)
 
-    def write_batch(self, data: Dict = dict()):
+        self.__statistics_db__ = \
+            self.get_repository_db_instnce(self.statistics_db_path, db_opts)
+
+    def __write_batch__(self, db, data: Dict = dict()):
         batch = rocksdb.WriteBatch()
 
         if not data:
@@ -21,13 +30,25 @@ class RocksdbHandler(StorageHandler):
             byte_value = bytes(value, 'utf-8')
             batch.put(byte_key, byte_value)
 
-        self.__db__.write(batch)
+        db.write(batch)
 
-    def get_batch(self, keys: Dict = list()):
-        return self.__db__.multi_get(keys)
+    def __get_batch__(self, db, keys: list = list()):
+        return db.multi_get(keys)
 
-    def get_db_instnce(self):
-        return rocksdb.DB("/opt/rocksdb/test.db", self.db_config())
+    def write_repository_batch(self, data: Dict = dict()):
+        self.__write_batch__(db=self.__repository_db__, data=data)
+
+    def write_statistics_batch(self, data: Dict = dict()):
+        self.__write_batch__(db=self.__statistics_db__, data=data)
+
+    def read_repository_batch(self, keys: list = list()):
+        self.__get_batch__(self.__repository_db__, keys)
+
+    def read_statistics_batch(self, keys: list = list()):
+        self.__get_batch__(self.__repository_db__, keys)
+
+    def get_db_instnce(self, db_path, opts):
+        return rocksdb.DB(db_path, opts)
 
     def db_config(self, prod: bool = False):
         opts = rocksdb.Options()
