@@ -1,33 +1,33 @@
 import requests
 from datetime import date
+# from storage.s3_handler import S3Handler
 
 
-def main():
+topic_list = ['big-data']
+excluded_repos = ['awesome-scalability']
 
-    topic_list = ['big-data']
+__statistics_dict__ = dict()
+__repos_dict__ = dict()
 
-    excluded_repos = ['awesome-scalability']
+current_date = date.today().strftime("%Y-%m-%d")
 
-    url_tuples = map(prepare_github_url, topic_list)
 
-    result_dict = dict()
-    for tuple in url_tuples:
-        result_dict[tuple[0]] = get_repo_data(tuple[1], excluded_repos)
+def lambda_handler(event, context):
+
+    for topic in topic_list:
+        __statistics_dict__[topic] = get_repo_data(topic, excluded_repos)
 
     print('result set:')
-    print(result_dict)
+    print(__statistics_dict__)
 
 
-def prepare_github_url(topic):
-    return topic, f'https://api.github.com/search/repositories?q=topic:{topic}&sort=stars&per_page=100'
-
-
-def get_repo_data(repo_url, excluded_repos):
+def get_repo_data(topic, excluded_repos):
     result_dict = dict()
-    headers = {"Accept": "applicaiton/vnd.github.v3+json"}
+    __headers__ = {"Accept": "applicaiton/vnd.github.v3+json"}
+    __repo_url__ = f'https://api.github.com/search/repositories?q=topic:{topic}&sort=stars&per_page=100'
 
     try:
-        r = requests.get(repo_url, headers=headers)
+        r = requests.get(__repo_url__, headers=__headers__)
     except requests.exceptions.ConnectionError:
         r.status_code = 500
 
@@ -42,20 +42,43 @@ def get_repo_data(repo_url, excluded_repos):
 
     repo_dicts = response_dict["items"]
     print(f"Page repos: {len(repo_dicts)}")
-    for repo in repo_dicts[:1]:  # first 5 elements for testing
+    for repo in repo_dicts[:5]:  # first 5 elements for testing
 
+        # TODO make this configurable
         if repo["name"] not in excluded_repos and repo["stargazers_count"] > 100:
-            fill_stats(repo, result_dict)
+            # TODO think about proper topic handling
+            fill_stats(topic, repo, result_dict)
 
     return result_dict
 
 
-def fill_stats(repo, result_dict):
-    repo_stats = dict()
+def fill_stats(topic, repo, result_dict):
     repo_name = repo["name"]
     repo_owner = repo["owner"]["login"]
 
-    repo_stats['date'] = compose_date()
+    if repo_exists(repo_name, repo_owner):
+        repo_stats = get_stats_from_cache(topic, repo_name)
+
+    else:
+        repo_stats = fill_repo_stats(repo, repo_name, repo_owner)
+
+    result_dict[repo_name] = repo_stats
+
+
+def repo_exists(repo_name, repo_owner):
+    if repo_name in __repos_dict__:
+        return repo_owner in __repos_dict__[repo_name]
+
+    return False
+
+
+def get_stats_from_cache(topic, repo_name):
+    return __statistics_dict__[topic][repo_name]
+
+
+def fill_repo_stats(repo, repo_name, repo_owner):
+    repo_stats = dict()
+    repo_stats['date'] = current_date
     repo_stats['repo_name'] = repo_name
     repo_stats['owner'] = repo_owner
     repo_stats['star_count'] = repo["stargazers_count"]
@@ -75,13 +98,7 @@ def fill_stats(repo, result_dict):
     repo_stats['closed_issues'] = get_count(repo_owner,
                                             repo_name,
                                             'issues', '&state=closed')
-
-    result_dict[repo_name] = repo_stats
-
-
-def compose_date():
-    today = date.today()
-    return today.strftime("%Y-%m-%d")
+    return repo_stats
 
 
 def get_count(owner, repo_name, suffix, state=''):
@@ -91,7 +108,6 @@ def get_count(owner, repo_name, suffix, state=''):
 
 def prepare_url(owner, repo_name, suffix, state):
     url = f'https://api.github.com/repos/{owner}/{repo_name}/{suffix}?per_page=1&anon=true{state}'
-    print(f'URL : {url}')
     return url
 
 
@@ -110,8 +126,6 @@ def get_total_count_from_headers(headers: dict):
     if not pagination_value:
         return 0
 
-    print(f'link header value: {pagination_value}')
-
     last_page_url = pagination_value.split(';')[-2]
     index_page = last_page_url.rfind('page=')
     index_bracket = last_page_url.rfind('>')
@@ -121,9 +135,8 @@ def get_total_count_from_headers(headers: dict):
         return 0
 
     count = last_page_url[(index_page + 5):index_bracket]
-    print(f'count is {count}')
     return count
 
 
 if __name__ == "__main__":
-    main()
+    lambda_handler(None, None)
