@@ -1,6 +1,6 @@
 import requests
 from datetime import date
-# from storage.s3_handler import S3Handler
+from grabby.storage.s3_handler import S3Handler
 
 
 topic_list = ['big-data']
@@ -11,6 +11,8 @@ __repos_dict__ = dict()
 
 current_date = date.today().strftime("%Y-%m-%d")
 
+s3_hander = S3Handler()
+
 
 def lambda_handler(event, context):
 
@@ -19,6 +21,9 @@ def lambda_handler(event, context):
 
     print('result set:')
     print(__statistics_dict__)
+
+    s3_hander.write_statistics_batch(__statistics_dict__)
+    s3_hander.write_repository_batch(__repos_dict__)
 
 
 def get_repo_data(topic, excluded_repos):
@@ -138,5 +143,5 @@ def get_total_count_from_headers(headers: dict):
     return count
 
 
-if __name__ == "__main__":
-    lambda_handler(None, None)
+# if __name__ == "__main__":
+#     lambda_handler(None, None)
