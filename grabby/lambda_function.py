@@ -1,6 +1,6 @@
 import requests
 from datetime import date
-from grabby.storage.s3_handler import S3Handler
+from storage.s3_handler import S3Handler
 
 
 topic_list = ['big-data']
