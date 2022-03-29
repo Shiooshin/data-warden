@@ -19,8 +19,14 @@ def lambda_handler(event, context):
     for topic in topic_list:
         __statistics_dict__[topic] = get_repo_data(topic, excluded_repos)
 
-    print('result set:')
+    print('----------------------')
+    print('statistics set:')
     print(__statistics_dict__)
+    print('----------------------')
+
+    print('repos set:')
+    print(__repos_dict__)
+    print('----------------------')
 
     s3_hander.write_statistics_batch(__statistics_dict__)
     s3_hander.write_repository_batch(__repos_dict__)
@@ -65,6 +71,7 @@ def fill_stats(topic, repo, result_dict):
         repo_stats = get_stats_from_cache(topic, repo_name)
 
     else:
+        fill_repo_dict(repo_name, repo_owner)
         repo_stats = fill_repo_stats(repo, repo_name, repo_owner)
 
     result_dict[repo_name] = repo_stats
@@ -72,13 +79,17 @@ def fill_stats(topic, repo, result_dict):
 
 def repo_exists(repo_name, repo_owner):
     if repo_name in __repos_dict__:
-        return repo_owner in __repos_dict__[repo_name]
+        return repo_owner == __repos_dict__[repo_name]['owner']
 
     return False
 
 
 def get_stats_from_cache(topic, repo_name):
     return __statistics_dict__[topic][repo_name]
+
+
+def fill_repo_dict(repo_name, repo_owner):  # TODO add more info for repo dictionary
+    __repos_dict__[repo_name] = {'owner': repo_owner}
 
 
 def fill_repo_stats(repo, repo_name, repo_owner):
