@@ -3,7 +3,7 @@ from datetime import date
 from storage.s3_handler import S3Handler
 
 
-topic_list = ['big-data']
+topic_list = ['big-data', 'olap']
 excluded_repos = ['awesome-scalability']
 
 __statistics_dict__ = dict()
@@ -11,7 +11,7 @@ __repos_dict__ = dict()
 
 current_date = date.today().strftime("%Y-%m-%d")
 
-s3_hander = S3Handler()
+storage_hander = S3Handler()
 
 
 def lambda_handler(event, context):
@@ -28,8 +28,8 @@ def lambda_handler(event, context):
     print(__repos_dict__)
     print('----------------------')
 
-    s3_hander.write_statistics_batch(__statistics_dict__)
-    s3_hander.write_repository_batch(__repos_dict__)
+    storage_hander.write_statistics_batch(__statistics_dict__)
+    storage_hander.write_repository_batch(__repos_dict__)
 
 
 def get_repo_data(topic, excluded_repos):
@@ -58,17 +58,17 @@ def get_repo_data(topic, excluded_repos):
         # TODO make this configurable
         if repo["name"] not in excluded_repos and repo["stargazers_count"] > 100:
             # TODO think about proper topic handling
-            fill_stats(topic, repo, result_dict)
+            fill_stats(repo, result_dict)
 
     return result_dict
 
 
-def fill_stats(topic, repo, result_dict):
+def fill_stats(repo, result_dict):
     repo_name = repo["name"]
     repo_owner = repo["owner"]["login"]
 
     if repo_exists(repo_name, repo_owner):
-        repo_stats = get_stats_from_cache(topic, repo_name)
+        repo_stats = get_stats_from_cache(repo_name)
 
     else:
         fill_repo_dict(repo_name, repo_owner)
@@ -84,8 +84,10 @@ def repo_exists(repo_name, repo_owner):
     return False
 
 
-def get_stats_from_cache(topic, repo_name):
-    return __statistics_dict__[topic][repo_name]
+def get_stats_from_cache(repo_name):
+    for value in __statistics_dict__.values():
+        if repo_name in value:
+            return value
 
 
 def fill_repo_dict(repo_name, repo_owner):  # TODO add more info for repo dictionary
