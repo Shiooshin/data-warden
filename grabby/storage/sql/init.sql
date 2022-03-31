@@ -3,15 +3,14 @@ SELECT 'CREATE DATABASE repositories' WHERE NOT EXISTS (SELECT FROM pg_database 
 
 /* create tables */
 CREATE TABLE IF NOT EXISTS repository (
-    repo_id SERIAL PRIMARY KEY,
-    name VARCHAR ( 50 ) NOT NULL,
+    name VARCHAR ( 50 ) NOT NULL PRIMARY KEY,
     owner VARCHAR ( 50 ) NOT NULL,
     tags VARCHAR ( 256 ) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS repo_statistics (
     stas_id SERIAL,
-    repo_id INT,
+    repo_name VARCHAR ( 50 ) NOT NULL,
     agg_date DATE NOT NULL,
     star_count INT NOT NULL,
     watcher_count INT NOT NULL,
@@ -20,7 +19,7 @@ CREATE TABLE IF NOT EXISTS repo_statistics (
     contributors INT NOT NULL,
     commits INT NOT NULL,
     closed_issues INT NOT NULL,
-    PRIMARY KEY (repo_id, agg_date),
-    FOREIGN KEY (repo_id)
-        REFERENCES repository (repo_id)
+    PRIMARY KEY (repo_name, agg_date),
+    FOREIGN KEY (repo_name)
+        REFERENCES repository (name)
 );

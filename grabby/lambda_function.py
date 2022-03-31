@@ -28,8 +28,8 @@ def lambda_handler(event, context):
     print(__repos_dict__)
     print('----------------------')
 
-    storage_hander.write_statistics_batch(__statistics_dict__)
     storage_hander.write_repository_batch(__repos_dict__)
+    storage_hander.write_statistics_batch(__statistics_dict__)
 
 
 def get_repo_data(topic, excluded_repos):
@@ -66,12 +66,14 @@ def get_repo_data(topic, excluded_repos):
 def fill_stats(repo, result_dict):
     repo_name = repo["name"]
     repo_owner = repo["owner"]["login"]
+    repo_tags = repo["topics"]
 
     if repo_exists(repo_name, repo_owner):
-        repo_stats = get_stats_from_cache(repo_name)
+        print(f'repository {repo_name} exists')
+        return
 
     else:
-        fill_repo_dict(repo_name, repo_owner)
+        fill_repo_dict(repo_name, repo_owner, repo_tags)
         repo_stats = fill_repo_stats(repo, repo_name, repo_owner)
 
     result_dict[repo_name] = repo_stats
@@ -87,16 +89,16 @@ def repo_exists(repo_name, repo_owner):
 def get_stats_from_cache(repo_name):
     for value in __statistics_dict__.values():
         if repo_name in value:
-            return value
+            return value[repo_name]
 
 
-def fill_repo_dict(repo_name, repo_owner):  # TODO add more info for repo dictionary
-    __repos_dict__[repo_name] = {'owner': repo_owner}
+def fill_repo_dict(repo_name, repo_owner, tags):  # TODO add more info for repo dictionary
+    __repos_dict__[repo_name] = {'name': repo_name, 'owner': repo_owner, 'tags': tags}
 
 
 def fill_repo_stats(repo, repo_name, repo_owner):
     repo_stats = dict()
-    repo_stats['date'] = current_date
+    repo_stats['agg_date'] = current_date
     repo_stats['repo_name'] = repo_name
     repo_stats['owner'] = repo_owner
     repo_stats['star_count'] = repo["stargazers_count"]
