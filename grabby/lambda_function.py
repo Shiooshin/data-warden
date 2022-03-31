@@ -38,7 +38,8 @@ def get_repo_data(topic, excluded_repos):
     __repo_url__ = f'https://api.github.com/search/repositories?q=topic:{topic}&sort=stars&per_page=100'
 
     try:
-        r = requests.get(__repo_url__, headers=__headers__)
+        r = requests.get(__repo_url__, headers=__headers__,
+                         auth=('username', 'token'))
     except requests.exceptions.ConnectionError:
         r.status_code = 500
 
@@ -132,9 +133,10 @@ def prepare_url(owner, repo_name, suffix, state):
 
 
 def get_headers(url):
-    response = requests.get(url)
+    response = requests.get(url, auth=('username', 'token'))
 
     if response.status_code == 200:
+        print(f"requests left: {response.headers.get('x-ratelimit-remaining')}")  # TODO if limit < 0 wait
         return response.headers
 
     return dict()

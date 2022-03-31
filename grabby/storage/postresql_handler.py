@@ -48,23 +48,28 @@ class PostgresqlHandler(StorageHandler):
     def __prepare_values__(self, columns, data: dict):
         values = []
         for vals in data.values():
-            value_row = []
-            for column in columns:
-                if column in vals:
-                    if isinstance(vals[column], int):
-                        value_row.append(str(vals[column]))
-                    elif isinstance(vals[column], list):
-                        cleaned = str(vals[column]).replace("'", "")
-                        value_row.append(f"'{cleaned}'")
-                    else:
-                        value_row.append(f"'{vals[column]}'")
-                else:
-                    print(f"should not miss any column, but misses {column} for value: {vals}")
-            ret_row = f'({",".join(value_row)})'
-            values.append(ret_row)
+            values.append(self.__prepare_row__(columns, vals))
 
         ret_val = ",".join(values)
         return ret_val
+
+    def __prepare_row__(self, columns, vals):
+        value_row = []
+        for column in columns:
+            if column in vals:
+                value_row.append(self.__prepare_column__(vals[column]))
+            else:
+                print(f"should not miss any column, but misses {column} for value: {vals}")
+        return f'({",".join(value_row)})'
+
+    def __prepare_column__(self, value):
+        if isinstance(value, int):
+            return str(value)
+        elif isinstance(value, list):
+            cleaned = str(value).replace("'", "")
+            return f"'{cleaned}'"
+        else:
+            return f"'{value}'"
 
     def __get_batch__(self, table, column="id", keys: Dict = list()):
         cursor = self.__conn__.cursor()
