@@ -3,18 +3,21 @@ from grabby.storage.handler import StorageHandler
 from typing import Dict
 import json
 import boto3
+import config
 from botocore.config import Config
 
 
 class S3Handler(StorageHandler):
+    __config__ = config.Config()
+
     __today_date__ = date.today().strftime("%Y-%m-%d")
-    __bucket_name__ = "data-warden-statistics"
+
+    __bucket_name__ = __config__.get('bucket', 's3')
+    __region_name__ = __config__.get('region', 's3')
+    __s3__ = None
 
     __stats_file__ = f"{__today_date__}/stats"
     __repo_file__ = f"{__today_date__}/repos"
-
-    __region_name__ = 'us-west-2'
-    __s3__ = None
 
     def __init__(self) -> None:
         super().__init__()

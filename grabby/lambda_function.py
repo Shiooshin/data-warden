@@ -1,10 +1,8 @@
 import requests
 from datetime import date
 from storage.s3_handler import S3Handler
+from config import Config
 
-
-topic_list = ['big-data', 'olap']
-excluded_repos = ['awesome-scalability']
 
 __statistics_dict__ = dict()
 __repos_dict__ = dict()
@@ -12,6 +10,10 @@ __repos_dict__ = dict()
 current_date = date.today().strftime("%Y-%m-%d")
 
 storage_hander = S3Handler()
+config = Config()
+
+topic_list = config.get('topic_list')
+excluded_repos = config.get('excluded_repo_list')
 
 
 def lambda_handler(event, context):
@@ -19,14 +21,15 @@ def lambda_handler(event, context):
     for topic in topic_list:
         __statistics_dict__[topic] = get_repo_data(topic, excluded_repos)
 
-    print('----------------------')
-    print('statistics set:')
-    print(__statistics_dict__)
-    print('----------------------')
+    if config.get('debug'):
+        print('----------------------')
+        print('statistics set:')
+        print(__statistics_dict__)
+        print('----------------------')
 
-    print('repos set:')
-    print(__repos_dict__)
-    print('----------------------')
+        print('repos set:')
+        print(__repos_dict__)
+        print('----------------------')
 
     storage_hander.write_repository_batch(__repos_dict__)
     storage_hander.write_statistics_batch(__statistics_dict__)
@@ -39,7 +42,7 @@ def get_repo_data(topic, excluded_repos):
 
     try:
         r = requests.get(__repo_url__, headers=__headers__,
-                         auth=('username', 'token'))
+                         auth=(config.get('username', 'github'), config.get('token', 'github')))
     except requests.exceptions.ConnectionError:
         r.status_code = 500
 
@@ -57,7 +60,7 @@ def get_repo_data(topic, excluded_repos):
     for repo in repo_dicts[:5]:  # first 5 elements for testing
 
         # TODO make this configurable
-        if repo["name"] not in excluded_repos and repo["stargazers_count"] > 100:
+        if repo["name"] not in excluded_repos and repo["stargazers_count"] > config.get('star_limit'):
             # TODO think about proper topic handling
             fill_stats(repo, result_dict)
 
@@ -133,7 +136,7 @@ def prepare_url(owner, repo_name, suffix, state):
 
 
 def get_headers(url):
-    response = requests.get(url, auth=('username', 'token'))
+    response = requests.get(url, auth=(config.get('username', 'github'), config.get('token', 'github')))
 
     if response.status_code == 200:
         print(f"requests left: {response.headers.get('x-ratelimit-remaining')}")  # TODO if limit < 0 wait

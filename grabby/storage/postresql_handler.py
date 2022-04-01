@@ -1,12 +1,15 @@
 from grabby.storage.handler import StorageHandler
 from typing import Dict
+from config import Config
 
 import psycopg2
 
 
 class PostgresqlHandler(StorageHandler):
-    __stats_table__ = "repo_statistics"
-    __repo_table__ = "repository"
+    __config__ = Config()
+
+    __stats_table__ = __config__.get('stats_table', 'postgresql')
+    __repo_table__ = __config__.get('repo_table', 'postgresql')
 
     __repo_cols__ = ["name", "owner", "tags"]
     __stats_cols__ = ["repo_name", "agg_date", "star_count",
@@ -79,8 +82,9 @@ class PostgresqlHandler(StorageHandler):
         cursor.execute(select_query)
 
     def get_connection(self):
+        con_conf = self.__config__.get('connection', 'postgres')
         return psycopg2.connect(
-               host="localhost",
-               database="repositories",
-               user="postgres",
-               password="postgres")
+               host=con_conf['host'],
+               database=con_conf['database'],
+               user=con_conf['username'],
+               password=con_conf['password'])

@@ -39,3 +39,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
+# Other project-related stuff
+config.yaml

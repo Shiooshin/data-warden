@@ -1,15 +1,18 @@
 import rocksdb
 import json
 from typing import Dict
+from config import Config
 from grabby.storage.handler import StorageHandler
 
 
 class RocksdbHandler(StorageHandler):
+    __config__ = Config()
+
     __repository_db__ = None
     __statistics_db__ = None
 
-    repository_db_path = "/opt/rocksdb/repository.db"
-    statistics_db_path = "/opt/rocksdb/statistics.db"
+    repository_db_path = __config__.get('repository_db_path', 'rocks_db')
+    statistics_db_path = __config__.get('statistics_db_path', 'rocks_db')
 
     def __init__(self) -> None:
         super().__init__()
