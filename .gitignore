@@ -42,3 +42,5 @@ cover/
 
 # Other project-related stuff
 config.yaml
+stats.json
+repos.json

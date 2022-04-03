@@ -3,6 +3,7 @@ from datetime import date
 from storage.s3_handler import S3Handler
 from config import Config
 
+import json
 
 __statistics_dict__ = dict()
 __repos_dict__ = dict()
@@ -14,6 +15,8 @@ config = Config()
 
 topic_list = config.get('topic_list')
 excluded_repos = config.get('excluded_repo_list')
+included_repos = config.get('included_repo_list')
+excluded_topics = config.get('excluded_topic_list')
 
 
 def lambda_handler(event, context):
@@ -22,17 +25,19 @@ def lambda_handler(event, context):
         __statistics_dict__[topic] = get_repo_data(topic, excluded_repos)
 
     if config.get('debug'):
-        print('----------------------')
-        print('statistics set:')
-        print(__statistics_dict__)
-        print('----------------------')
 
-        print('repos set:')
-        print(__repos_dict__)
-        print('----------------------')
+        json_object = json.dumps(__repos_dict__)
+        # Writing to sample.json
+        with open("repos.json", "w") as outfile:
+            outfile.write(json_object)
 
-    storage_hander.write_repository_batch(__repos_dict__)
-    storage_hander.write_statistics_batch(__statistics_dict__)
+        json_object = json.dumps(__statistics_dict__)
+        # Writing to sample.json
+        with open("stats.json", "w") as outfile:
+            outfile.write(json_object)
+
+    # storage_hander.write_repository_batch(__repos_dict__)
+    # storage_hander.write_statistics_batch(__statistics_dict__)
 
 
 def get_repo_data(topic, excluded_repos):
@@ -57,14 +62,37 @@ def get_repo_data(topic, excluded_repos):
 
     repo_dicts = response_dict["items"]
     print(f"Page repos: {len(repo_dicts)}")
-    for repo in repo_dicts[:5]:  # first 5 elements for testing
+    for repo in repo_dicts:  # first 5 elements for testing
 
-        # TODO make this configurable
-        if repo["name"] not in excluded_repos and repo["stargazers_count"] > config.get('star_limit'):
+        if repo["stargazers_count"] < config.get('star_limit'):
+            break
+
+        if not is_valid_repo(repo):
+            continue
+
+        # TODO also add check for append repos
+        if repo["name"] not in excluded_repos:
             # TODO think about proper topic handling
             fill_stats(repo, result_dict)
 
     return result_dict
+
+
+def is_valid_repo(repo):
+    if not repo["topics"]:
+        return False
+
+    if repo["name"] in included_repos:
+        return True
+
+    return is_valid_topics(repo["topics"])
+
+
+def is_valid_topics(topics):
+    for excluded_topic in excluded_topics:
+        if excluded_topic in topics:
+            return False
+    return True
 
 
 def fill_stats(repo, result_dict):
