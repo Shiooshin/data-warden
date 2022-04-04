@@ -41,6 +41,6 @@ coverage.xml
 cover/
 
 # Other project-related stuff
-config.yaml
+config_local.yaml
 stats.json
 repos.json

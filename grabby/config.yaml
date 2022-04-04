@@ -1,0 +1,161 @@
+general:
+    debug: true
+    topic_list:
+        - data-catalog
+        - data-analysis
+        - data-analytics
+        - bi
+        - data-engineering
+        - data-ops
+        - stream-processing
+        - mpp
+        - distributed-database
+        - olap
+        - analytics
+        - data-quality
+        - data-discovery
+        - data-governance
+        - data-profiling
+        - data-integration
+        - data-warehouse
+        - hadoop
+        - etl
+        - datalake
+        - big-data
+    excluded_repo_list:
+        - awesome-scalability # awesome series
+        - CyberChef # learning
+        - goaccess # log analysis
+        - gop # other
+        - pandas_exercises # learning
+        - statsmodels # statistics
+        - gonum # statistics
+        - knowledge-repo # learning
+        - awesome-R # awesome series
+        - akshare # domain-specfic(fintech)
+        - weibospider # domain-specific(crawling)
+        - pydata-notebook # book
+        - plotnine # viz lib
+        - Awesome-Geospatial # awesome series
+        - matplotplusplus # viz lib
+        - tad # tabular data only
+        - pandas-datareader # ingestion lib (?)
+        - AAChartKit-Swift # viz lib
+        - gopup # data sources
+        - pandas-videos # learning
+        - pbpython # learning
+        - 100-pandas-puzzles # learning
+        - Linear_Algebra_With_Python # learning
+        - awesome-business-intelligence # awesome series
+        - datatable # data structure lib
+        - hacknical # domain-specific(resume)
+        - pymc-resources # learning
+        - tsne-cuda # python lib
+        - Dex # not working
+        - python_data_analysis_and_mining_action # book
+        - janitor # lib in R
+        - data-forge-ts # ts lib
+        - data-selfie # browser extension
+        - awesome-bigdata # awesome series
+        - DataV # ui component
+        - Cookbook # awesome series
+        - data-engineer-roadmap # learning
+        - growthbook # not DE 
+        - Data-Engineering-HowTo # learning
+        - flink-learning # learning
+        - awesome-system-design # awesome series
+        - watermill # Go lib
+        - fluent-bit # logs processor
+        - gojay # json parser
+        - awesome-streaming # awesome series
+        - riko # stream lib
+        - wally # stream lib
+        - awesome-blockchains # awesome series
+        - netdata # generic monitoring
+        - excelize # go lib for excel
+        - dashboards # html templates
+        - analytics # js for tracking
+        - react-native-firebase # lib for react
+        - amplify-js # cloud lib
+        - sourcerer-app # github vis
+        - phpinsights # php lib
+        - Tautulli # python lib
+        - polr # url shortener
+        - ahoy # analytics lib
+        - weld # runtime
+        - laravel-analytics # GA lib
+        - amplify-cli # aws cli
+        - angle-grinder # log metrics
+        - django-DefectDojo # devsceops
+        - angulartics # tracking lib
+        - stacks-cli # deprecated
+        - rita # not DE related
+        - vue-analytics # GA plugin
+        - pygraphistry # pythin graph lib
+        - rotki # not DE related
+        - covid19-dashboard # dataset
+        - dazzle # viz react lib
+        - sing-app # dashoard template
+        - homer # not DE
+        - SwiftInfo # mbile viz lib
+        - legacy-python-cli # derpecated
+        - mintable # not DE related
+        - WALKOFF # not DE related
+        - django-analytical # django analytical lib
+        - angulartics2 # angular lib
+        - BigData-Notes # leraning
+        - cython # not DE related
+        - Stream-Framework # not DE related
+        - vue-virtual-scroll-list # ui component
+        - NakedTensor # ml
+        - spark-doc-zh # deprecated
+        - 
+    included_repo_list:
+        - tablesaw
+        - flyte
+        - root
+        - feast
+        - ploomber
+        - pixie
+        - weld
+        - heavydb
+        - streamlit
+    excluded_topic_list:
+        - machine-learning
+    append_repo_list:
+        - etcd-io/etcd
+        - nsqio/nsq
+        - chrislusf/seaweedfs
+        - nats-io/nats-server
+        - apache/zookeeper
+        - rqlite/rqlite
+        - uber/cadence
+        - juicedata/juicefs
+        - gaia-pipeline/gaia
+        - travisjeffery/jocko
+        - gluster/glusterfs
+        - distribworks/dkron
+        - chrislusf/gleam
+        - storj/storj
+        - liftbridge-io/liftbridge
+        - mainflux/mainflux
+        - kairosdb/kairosdb
+    star_limit: 1000
+github:
+    username: #
+    token: #
+rocks_db:
+    repository_db_path: /opt/rocksdb/repository.db
+    statistics_db_path: /opt/rocksdb/statistics.db
+postgresql:
+    stats_table: repo_statistics
+    repo_table: repository
+    connection:
+        host: localhost
+        port: 5432
+        database: #
+        username: #
+        password: #
+s3:
+    region: us-west-2
+    bucket: #

@@ -8,6 +8,8 @@ import json
 __statistics_dict__ = dict()
 __repos_dict__ = dict()
 
+__headers__ = {"Accept": "applicaiton/vnd.github.v3+json"}
+
 current_date = date.today().strftime("%Y-%m-%d")
 
 storage_hander = S3Handler()
@@ -17,22 +19,23 @@ topic_list = config.get('topic_list')
 excluded_repos = config.get('excluded_repo_list')
 included_repos = config.get('included_repo_list')
 excluded_topics = config.get('excluded_topic_list')
+append_repos = config.get('append_repo_list')
 
 
 def lambda_handler(event, context):
 
+    handle_extra_repos()
+
     for topic in topic_list:
-        __statistics_dict__[topic] = get_repo_data(topic, excluded_repos)
+        __statistics_dict__[topic] = get_repo_data(topic)
 
     if config.get('debug'):
 
         json_object = json.dumps(__repos_dict__)
-        # Writing to sample.json
         with open("repos.json", "w") as outfile:
             outfile.write(json_object)
 
         json_object = json.dumps(__statistics_dict__)
-        # Writing to sample.json
         with open("stats.json", "w") as outfile:
             outfile.write(json_object)
 
@@ -40,9 +43,15 @@ def lambda_handler(event, context):
     # storage_hander.write_statistics_batch(__statistics_dict__)
 
 
-def get_repo_data(topic, excluded_repos):
+def handle_extra_repos():
     result_dict = dict()
-    __headers__ = {"Accept": "applicaiton/vnd.github.v3+json"}
+    extra_repos = get_extra_repos()
+    process_repos(extra_repos, result_dict)
+    __statistics_dict__['distributed-system'] = result_dict
+
+
+def get_repo_data(topic):
+    result_dict = dict()
     __repo_url__ = f'https://api.github.com/search/repositories?q=topic:{topic}&sort=stars&per_page=100'
 
     try:
@@ -61,31 +70,50 @@ def get_repo_data(topic, excluded_repos):
     print(f"Total repos: {response_dict['total_count']}")
 
     repo_dicts = response_dict["items"]
-    print(f"Page repos: {len(repo_dicts)}")
-    for repo in repo_dicts:  # first 5 elements for testing
+    process_repos(repo_dicts, result_dict)
+    return result_dict
 
+
+def process_repos(repo_dicts, result_dict):
+    for repo in repo_dicts:
         if repo["stargazers_count"] < config.get('star_limit'):
-            break
+            break  # no need to go furher, there are only lower star projects
 
         if not is_valid_repo(repo):
             continue
 
-        # TODO also add check for append repos
         if repo["name"] not in excluded_repos:
-            # TODO think about proper topic handling
             fill_stats(repo, result_dict)
 
-    return result_dict
+
+def get_extra_repos():
+    extra_repos = []
+
+    for append_repo in append_repos:
+        repo_url = f'https://api.github.com/search/repositories?q=repo:{append_repo}&sort=stars&per_page=100'
+
+        try:
+            r = requests.get(repo_url, headers=__headers__,
+                             auth=(config.get('username', 'github'), config.get('token', 'github')))
+        except requests.exceptions.ConnectionError:
+            print(f'Request failed for url {repo_url}')
+            continue
+
+        extra_repos.append(r.json()["items"][0])
+
+    return extra_repos
 
 
 def is_valid_repo(repo):
-    if not repo["topics"]:
+    topics = repo["topics"]
+
+    if not topics:
         return False
 
     if repo["name"] in included_repos:
         return True
 
-    return is_valid_topics(repo["topics"])
+    return is_valid_topics(topics)
 
 
 def is_valid_topics(topics):
