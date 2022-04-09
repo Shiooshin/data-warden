@@ -1,4 +1,4 @@
-from grabby.storage.handler import StorageHandler
+from common.storage.handler import StorageHandler
 from typing import Dict
 from config import Config
 
@@ -88,3 +88,9 @@ class PostgresqlHandler(StorageHandler):
                database=con_conf['database'],
                user=con_conf['username'],
                password=con_conf['password'])
+
+    def connection_established(self):
+        if self.self.__conn__ == 0:
+            return True
+
+        return False

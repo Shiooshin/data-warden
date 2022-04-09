@@ -1,7 +1,7 @@
 import requests
 from datetime import date
-from storage.s3_handler import S3Handler
-from config import Config
+from common.storage.s3_handler import S3Handler
+from common.config import Config
 
 import json
 

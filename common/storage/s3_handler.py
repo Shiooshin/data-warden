@@ -1,10 +1,11 @@
 from datetime import date
-from grabby.storage.handler import StorageHandler
+from common.storage.handler import StorageHandler
 from typing import Dict
 import json
 import boto3
 import config
 from botocore.config import Config
+from botocore.client import ClientError
 
 
 class S3Handler(StorageHandler):
@@ -54,3 +55,13 @@ class S3Handler(StorageHandler):
                                       Key=filename)
         contents = file['Body'].read()
         return json.loads(contents.decode('UTF-8'))
+
+    def connection_established(self):
+
+        try:
+            self.__s3__.meta.client.head_bucket(Bucket=self.__bucket_name__)
+        except ClientError:
+            print(f"No access to bucket or no permissions for {self.__bucket_name__}")
+            return False
+
+        return True

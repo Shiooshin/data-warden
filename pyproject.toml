@@ -11,6 +11,7 @@ python-rocksdb = "^0.7.0"
 psycopg2 = "^2.9.3"
 boto3 = "^1.21.24"
 PyYAML = "^6.0"
+APScheduler = "^3.9.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

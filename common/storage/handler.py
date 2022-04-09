@@ -19,3 +19,7 @@ class StorageHandler(abc.ABC):
     @abc.abstractmethod
     def read_statistics_batch(self, keys: list = list()):
         pass
+
+    @abc.abstractmethod
+    def connection_established(self):
+        pass

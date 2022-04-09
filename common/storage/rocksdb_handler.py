@@ -2,7 +2,7 @@ import rocksdb
 import json
 from typing import Dict
 from config import Config
-from grabby.storage.handler import StorageHandler
+from common.storage.handler import StorageHandler
 
 
 class RocksdbHandler(StorageHandler):
@@ -16,11 +16,16 @@ class RocksdbHandler(StorageHandler):
 
     def __init__(self) -> None:
         super().__init__()
-        self.__repository_db__ = \
-            self.get_db_instnce(self.repository_db_path, self.db_config())
+        try:
+            self.__repository_db__ = \
+                self.get_db_instnce(self.repository_db_path, self.db_config())
 
-        self.__statistics_db__ = \
-            self.get_db_instnce(self.statistics_db_path, self.db_config())
+            self.__statistics_db__ = \
+                self.get_db_instnce(self.statistics_db_path, self.db_config())
+        except Exception:
+            print("Could not establish connection to RocksDb")
+            self.__repository_db__ = None
+            self.__statistics_db__ = None
 
     def __write_batch__(self, db, data: Dict = dict()):
         batch = rocksdb.WriteBatch()
@@ -72,3 +77,9 @@ class RocksdbHandler(StorageHandler):
         else:
             opts.create_if_missing = True
         return opts
+
+    def connection_established(self):
+        if self.__repository_db__ is None or self.__statistics_db__ is None:
+            return False
+
+        return True
