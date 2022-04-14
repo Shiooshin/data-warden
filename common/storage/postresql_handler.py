@@ -1,3 +1,4 @@
+from datetime import date
 from common.storage.handler import StorageHandler
 from typing import Dict
 from config import Config
@@ -10,11 +11,13 @@ class PostgresqlHandler(StorageHandler):
 
     __stats_table__ = __config__.get('stats_table', 'postgresql')
     __repo_table__ = __config__.get('repo_table', 'postgresql')
+    __etl_table__ = __config__.get('etl_table', 'postgresql')
 
     __repo_cols__ = ["name", "owner", "tags"]
     __stats_cols__ = ["repo_name", "agg_date", "star_count",
                       "watcher_count", "fork_count", "open_issues",
                       "contributors", "commits", "closed_issues"]
+    __etl_cols__ = ["agg_date", "status"]
 
     __conn__ = None
 
@@ -29,6 +32,9 @@ class PostgresqlHandler(StorageHandler):
     def write_statistics_batch(self, data: Dict = dict()):
         for key, values in data.items():
             self.__write_batch__(self.__stats_table__, self.__stats_cols__, values)
+
+    def write_etl_batch(self, data: Dict = dict()):
+        self.__write_batch__(self.__etl_table__, self.__etl_cols__, data)
 
     def read_repository_batch(self, keys: list = list()):
         result = self.__get_batch__(self.__repo_table__, "name", keys)
@@ -74,12 +80,21 @@ class PostgresqlHandler(StorageHandler):
         else:
             return f"'{value}'"
 
+    def has_today_etl(self):
+        today_str = date.today().strftime("%Y-%m-%d")
+        cursor = self.__conn__.cursor()
+        cursor.execute(f"select * from {self.__etl_table__} where agg_date = {today_str}")
+        result = cursor.fetchone()
+
+        return len(result) > 0
+
     def __get_batch__(self, table, column="id", keys: Dict = list()):
         cursor = self.__conn__.cursor()
         select_query = \
             f"select * from {table} where {column} in (${','.join(keys)})"
 
-        cursor.execute(select_query)
+        cursor.execute(select_query)  # TODO return proper result
+        return cursor.fetchall()
 
     def get_connection(self):
         con_conf = self.__config__.get('connection', 'postgres')

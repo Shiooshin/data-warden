@@ -150,6 +150,7 @@ rocks_db:
 postgresql:
     stats_table: repo_statistics
     repo_table: repository
+    etl_table: etl_status
     connection:
         host: localhost
         port: 5432

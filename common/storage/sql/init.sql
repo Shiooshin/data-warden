@@ -23,3 +23,11 @@ CREATE TABLE IF NOT EXISTS repo_statistics (
     FOREIGN KEY (repo_name)
         REFERENCES repository (name)
 );
+
+CREATE TYPE StatusEnum AS ENUM('SUCCESS','RUNNING','ERROR', 'NA');
+
+CREATE TABLE IF NOT EXISTS etl_status (
+    agg_date DATE NOT NULL,
+    status StatusEnum NOT NULL DEFAULT 'NA',
+    PRIMARY KEY (agg_date)
+);
