@@ -37,6 +37,7 @@ class RocksdbHandler(StorageHandler):
             byte_key = bytes(key, 'utf-8')
             byte_value = json.dumps(value).encode('utf-8')
             batch.put(byte_key, byte_value)
+            #  TODO add agg_date as default column to insert
 
         db.write(batch)
 
@@ -44,16 +45,16 @@ class RocksdbHandler(StorageHandler):
         b_keys = list(map(lambda key: bytes(key, 'utf-8'), keys))
         return db.multi_get(b_keys)
 
-    def write_repository_batch(self, data: Dict = dict()):
+    def write_repository_batch(self, date, data: Dict = dict()):
         self.__write_batch__(db=self.__repository_db__, data=data)
 
-    def write_statistics_batch(self, data: Dict = dict()):
+    def write_statistics_batch(self, date, data: Dict = dict()):
         self.__write_batch__(db=self.__statistics_db__, data=data)
 
-    def read_repository_batch(self, keys: list = list()):
+    def read_repository_batch(self, date, keys: list = list()):
         return self.__get_batch__(self.__repository_db__, keys)
 
-    def read_statistics_batch(self, keys: list = list()):
+    def read_statistics_batch(self, date, keys: list = list()):
         return self.__get_batch__(self.__repository_db__, keys)
 
     def get_db_instnce(self, db_path, opts):

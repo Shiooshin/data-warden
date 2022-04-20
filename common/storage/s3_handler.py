@@ -17,8 +17,8 @@ class S3Handler(StorageHandler):
     __region_name__ = __config__.get('region', 's3')
     __s3__ = None
 
-    __stats_file__ = f"{__today_date__}/stats"
-    __repo_file__ = f"{__today_date__}/repos"
+    __stats_file_pref__ = "stats"
+    __repo_file_pref__ = "repos"
 
     def __init__(self) -> None:
         super().__init__()
@@ -32,17 +32,17 @@ class S3Handler(StorageHandler):
 
         return boto3.client('s3', config=configuration)
 
-    def write_statistics_batch(self, data: Dict = dict()):
-        self.write_batch(self.__stats_file__, data)
+    def write_statistics_batch(self, date=__today_date__, data: Dict = dict()):
+        self.write_batch(f"{date}/{self.__stats_file_pref__}", data)
 
-    def read_statistics_batch(self, keys: list = list()):
-        return self.read_batch(self.__stats_file__)
+    def read_statistics_batch(self, date, keys: list = list()):
+        return self.read_batch(f"{date}/{self.__stats_file_pref__}")
 
-    def read_repository_batch(self, keys: list = list()):
-        return self.read_batch(self.__repo_file__)
+    def read_repository_batch(self, date, keys: list = list()):
+        return self.read_batch(f"{date}/{self.__repo_file_pref__}")
 
-    def write_repository_batch(self, data: Dict = dict()):
-        self.write_batch(self.__repo_file__, data)
+    def write_repository_batch(self, date, data: Dict = dict()):
+        self.write_batch(f"{date}/{self.__repo_file_pref__}", data)
 
     def write_batch(self, filename, data: Dict = dict()):
         encoded = bytes(json.dumps(data).encode('UTF-8'))

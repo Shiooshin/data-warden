@@ -26,21 +26,21 @@ class PostgresqlHandler(StorageHandler):
 
         self.__conn__ = self.get_connection()
 
-    def write_repository_batch(self, data: Dict = dict()):
+    def write_repository_batch(self, date, data: Dict = dict()):
         self.__write_batch__(self.__repo_table__, self.__repo_cols__, data)
 
-    def write_statistics_batch(self, data: Dict = dict()):
+    def write_statistics_batch(self, date, data: Dict = dict()):
         for key, values in data.items():
             self.__write_batch__(self.__stats_table__, self.__stats_cols__, values)
 
-    def write_etl_batch(self, data: Dict = dict()):
+    def write_etl_batch(self, date, data: Dict = dict()):
         self.__write_batch__(self.__etl_table__, self.__etl_cols__, data)
 
-    def read_repository_batch(self, keys: list = list()):
+    def read_repository_batch(self, date, keys: list = list()):
         result = self.__get_batch__(self.__repo_table__, "name", keys)
         print(result)
 
-    def read_statistics_batch(self, keys: list = list()):
+    def read_statistics_batch(self, date, keys: list = list()):
         result = self.__get_batch__(self.__stats_table__, "agg_date", keys)
         print(result)
 
