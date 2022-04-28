@@ -26,21 +26,41 @@ class PostgresqlHandler(StorageHandler):
 
         self.__conn__ = self.get_connection()
 
-    def write_repository_batch(self, date, data: Dict = dict()):
-        self.__write_batch__(self.__repo_table__, self.__repo_cols__, data)
+    def write_repository_batch(self, data: Dict = dict()):
+        repo_names = list(map(data['name']))
+        result_rows = self.read_repository_batch(repo_names)
 
-    def write_statistics_batch(self, date, data: Dict = dict()):
+        if len(result_rows) == len(repo_names):
+            return  # nothing to do
+
+        filtered_data = self.prepare_write_batch(repo_names, result_rows, data)
+
+        self.__write_batch__(self.__repo_table__, self.__repo_cols__, filtered_data)
+
+    def prepare_write_batch(self, repo_names: list, result_rows, data):
+        existing_names = []
+        for row in result_rows:
+            existing_names.append(row['name'])
+
+        resulting_data = {}
+        for repo in repo_names:
+            if repo not in existing_names:
+                resulting_data[repo] = data[repo]
+
+        return resulting_data
+
+    def write_statistics_batch(self, data: Dict = dict()):
         for key, values in data.items():
             self.__write_batch__(self.__stats_table__, self.__stats_cols__, values)
 
-    def write_etl_batch(self, date, data: Dict = dict()):
+    def write_etl_batch(self, data: Dict = dict()):
         self.__write_batch__(self.__etl_table__, self.__etl_cols__, data)
 
-    def read_repository_batch(self, date, keys: list = list()):
+    def read_repository_batch(self, keys: list = list()):
         result = self.__get_batch__(self.__repo_table__, "name", keys)
         print(result)
 
-    def read_statistics_batch(self, date, keys: list = list()):
+    def read_statistics_batch(self, keys: list = list()):
         result = self.__get_batch__(self.__stats_table__, "agg_date", keys)
         print(result)
 
