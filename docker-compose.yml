@@ -10,6 +10,12 @@ services:
       - '5432:5432'
     volumes: 
       - db:/opt/postgresql/data
+  web:
+    image: "periodic-puller:latest"
+  puller:
+    image: "data-warden-web:latest"
+    ports:
+      - "8001:8001"
 volumes:
   db:
     driver: local
