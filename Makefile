@@ -9,6 +9,7 @@ build-web:
 build-puller:
 	@echo '<<<Building Periodic Puller Docker image..>>>'
 	mkdir $(DIST_DIR)
+	cp requirements.txt $(DIST_DIR)
 	cp periodic_puller/* $(DIST_DIR)
 	cp -R common $(DIST_DIR)/common
 	docker build -t $(PULLER_IMAGE_NAME):latest $(DIST_DIR)/.
