@@ -22,4 +22,5 @@ run:
 # docker-compose up -d
 
 shutdown:
-	docker-compose down
+	@echo 'Stopping services. For now it will be a stub'
+# docker-compose down

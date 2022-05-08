@@ -19,12 +19,12 @@ steps:
     when:
       branch:
         - master
-  # - name: cleanup runnning services
-  #   commands:
-  #     - make shutdown
-  #   when:
-  #     branch:
-  #       - master
+  - name: cleanup runnning services
+    commands:
+      - make shutdown
+    when:
+      branch:
+        - master
   - name: spin up
     when:
       branch:
