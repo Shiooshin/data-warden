@@ -142,8 +142,8 @@ general:
         - kairosdb/kairosdb
     star_limit: 1000
 github:
-    username: #
-    token: #
+    username: ${GITHUB_USER}
+    token: ${GITHUB_TOKEN}
 rocks_db:
     repository_db_path: /opt/rocksdb/repository.db
     statistics_db_path: /opt/rocksdb/statistics.db
@@ -154,9 +154,9 @@ postgresql:
     connection:
         host: localhost
         port: 5432
-        database: #
-        username: #
-        password: #
+        database: ${PG_DB}
+        username: ${PG_USER}
+        password: ${PG_PASS}
 s3:
     region: us-west-2
-    bucket: #
+    bucket: ${S3_BUCKET}

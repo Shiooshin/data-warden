@@ -1,0 +1,49 @@
+---
+kind: pipeline
+type: ssh
+name: default
+
+#connection to ssh machine to run docker container
+server:
+  host:
+    from_secret: ssh_host
+  user:
+    from_secret: ssh_name
+  ssh_key:
+    from_secret: ssh_key
+
+steps:
+  - name: build images
+    commands:
+      - make build-puller
+    when:
+      branch:
+        - master
+  # - name: cleanup runnning services
+  #   commands:
+  #     - make shutdown
+  #   when:
+  #     branch:
+  #       - master
+  - name: spin up
+    when:
+      branch:
+        - master
+    environment:
+      PG_DB:
+        from_secret: postgres_db
+      PG_USER:
+        from_secret: postgres_user
+      PG_PASS:
+        from_secret: postgres_pass
+      GITHUB_USER:
+        from_secret: github_user
+      GITHUB_TOKEN:
+        from_secret: github_token
+      S3_BUCKET:
+        from_secret: s3_bucket
+    commands:
+      - make run
+trigger:
+  branch:
+    - master

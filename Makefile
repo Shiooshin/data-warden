@@ -18,7 +18,8 @@ build-puller:
 build-images: build-web build-puller
 
 run:
-	docker-compose up -d
+	@echo 'Runnning services. For now it will be a stub'
+# docker-compose up -d
 
 shutdown:
 	docker-compose down
