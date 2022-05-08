@@ -15,6 +15,7 @@ def pulling_job():
     print("Decorated job")
 
     if not __postgres_handler__.has_today_etl():
+        print("Pouring data")
         pour_data()
 
 
@@ -27,8 +28,8 @@ def pour_data(date=__today_date__):
 
 
 def update_etl_status(date, result_status):
-    values = {"agg_date": date, "status": result_status}
-    __postgres_handler__.write_etl_batch(date, values)
+    values = {'today': {"agg_date": date, "status": result_status}}
+    __postgres_handler__.write_etl_batch(values)
 
 
 def pour_statistics(date):
@@ -51,7 +52,7 @@ def pour_repos(date):
 def get_scheduler():
 
     scheduler = BlockingScheduler()
-    scheduler.add_job(pulling_job, 'interval', seconds=3)
+    scheduler.add_job(pulling_job, 'interval', hours=12)
 
     return scheduler
 

@@ -3,13 +3,13 @@ from common.storage.handler import StorageHandler
 from typing import Dict
 import json
 import boto3
-import config
+import common.config as cfg
 from botocore.config import Config
 from botocore.client import ClientError
 
 
 class S3Handler(StorageHandler):
-    __config__ = config.Config()
+    __config__ = cfg.Config()
 
     __today_date__ = date.today().strftime("%Y-%m-%d")
 

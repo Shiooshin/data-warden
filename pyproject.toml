@@ -5,7 +5,7 @@ description = ""
 authors = ["Marian Faryna <marikfarik@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 fastapi = "^0.73.0"
 python-rocksdb = "^0.7.0"
 psycopg2 = "^2.9.3"
@@ -19,6 +19,40 @@ flake8 = "^4.0.1"
 uvicorn = "^0.17.1"
 requests = "^2.27.1"
 autopep8 = "^1.6.0"
+mypy = "^0.950"
+black = {version = "^22.3.0", allow-prereleases = true}
+isort = "^5.10.1"
+
+[tool.black]
+line-length = 120
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 79
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
