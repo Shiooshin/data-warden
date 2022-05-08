@@ -44,3 +44,4 @@ cover/
 config_local.yaml
 stats.json
 repos.json
+.mypy_cache/
